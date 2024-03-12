@@ -8,10 +8,10 @@ sys.path.append('..')
 # Parameters
 
 LOCATION_DATA   = 'data/'
-# VARS_SIG        = ['HF', 'PVC', 'RF', 'SpO2', 'ABPd', 'ABPm', 'ABPs', 'etCO2']
+# VARS_SIG        = ['HF', 'RF', 'SpO2', 'ABPd', 'ABPm', 'ABPs', 'etCO2']
 HOURS_MIN       = 6
-VARS_MIN        = 5
-s               = 15
+VARS_MIN        = 4
+s               = 30
 
 # SIGNAL
 print('Preprocess signal...')
@@ -38,13 +38,11 @@ del signal
 count_hours                   = signal_pivoted.groupby('MRN').count().iloc[:, 0]*s/60/60
 pats_to_keep                  = count_hours[count_hours >= HOURS_MIN].index
 signal_pivoted                = signal_pivoted[signal_pivoted.MRN.isin(pats_to_keep)]
-
-print(signal_pivoted)
     
 # Keep rows with at least "VARS_MIN" columns present
 signal_pivoted                = signal_pivoted[signal_pivoted.
-                                               loc[:, ['ABPd', 'ABPm', 'ABPs', 'HF', 'PVC', 'RF', 'SpO2', 'etCO2']].
-                                               isna().sum(axis=1) <= (8-VARS_MIN)]
+                                               loc[:, ['ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2', 'etCO2']].
+                                               isna().sum(axis=1) <= (7-VARS_MIN)]
 
 # Add binary features
 signal_pivoted['etCO2_bin']   = np.where(~signal_pivoted['etCO2'].isna(), 1, 0).tolist()
@@ -100,20 +98,20 @@ substrings = ['ABP geen puls', 'ECG afl. los',
  'ABP Geen transdcr', 'ABP buiten bereik', 'ABP artefact',
  ' SpO low', ' VTach', ' HF high',
  'ABP-meting misl.',  'SpO intrfrentie', ' Desaturatie', ' AFIB',
- ' Einde AFIB,' " R-op-T PVC''s", " Run PVC''s high", 'Som ECG alrmn uit',
+ ' Einde AFIB', 'Som ECG alrmn uit',
  'SpO zwak signaal', ' RF high', ' Pauze', ' SpO gn puls',
  'ABP onderbroken', ' Extreme tachy', ' Extreme brady',
  ' asystolie', 'ABP defect', 'SpO grillig' ,
- ' Vent fibr/tach', ' ABPs high', " PVC's/min high", " Run PVC's high",
- 'ABP slecht signaal', ' Ventr.ritme', " R-op-T PVC's",
+ ' Vent fibr/tach', ' ABPs high',
+ 'ABP slecht signaal', ' Ventr.ritme', 
  ' Tachy (pols)', ' Pols high', ' Desat low ', 'ABPs low ', 'ABPs high ',
- " PVC''s/min high", 'SpO low ', 'ABPs - low ', ' HF low ', 'RF high ',
+  'SpO low ', 'ABPs - low ', ' HF low ', 'RF high ',
  'xBrady low ', 'xTachy high', ' HF high ', 'etCO low ',
  'etCO high ', 'RF low ', ' Apneu : ', 'SpO sens.defect',
  'V Afl. los', 'EcgOutput defect',
- ' Brady (pols)', " Doublet PVC''s", " Multivorm PVC''s",
+ ' Brady (pols)',
  'ECG contr kabel', ' etCO high', ' etCO low',
- 'SpO onbk.sensor', 'Brady/P low ', " PVC's/min high ",
+ 'SpO onbk.sensor', 'Brady/P low ',
  'HF high ', 'ABPm high ', 'ABPm low ', ' ABPm high', ' ABPm low', ' SpO high',
  'Tachy/P high', 'HF low ', 'SpO ctrl sensor', 'ABPm - low ',
  'ABP contr. mancht' , ' HF onregelmatig', ' Einde onreg. HF' ,
@@ -146,9 +144,9 @@ new_cols = ['HI_ABP_Geen_transdcr', 'HI_ABP_buiten_bereik', 'HI_ABP_contr_mancht
             'RA_Apneu','RA_Apneu','RA_Brady','RA_Desaturatie' ,'RA_Desaturatie','RA_Extreme_brady','RA_Extreme_tachy',
             'RA_Tachy','RA_ VTach','RA_Vent_fibr/tach','RA_asystolie','RA_ABPm_low','RA_ABPm_high',
             'RA_ABPm_low','RA_ABPs_low','RA_ABPs_high' ,'RA_ABPs_low','RA_Brady/P_low' ,'RA_Tachy/P_high','RA_Tachy/P_high',
-            'RA_xBrady_low' ,'RA_xTachy_high','RA_xTachy_high','SYA_AFIB','SYA_Doublet_PVCs','SYA_Einde onreg_HF',
-            'SYA_HF_high','SYA_HF_high' ,'SYA_HF_low','SYA_HF_low' ,'SYA_HF_onregelmatig','SYA_Multivorm_PVCs','SYA_PVCs/min_high',
-            'SYA_PVCs/min_high','SYA_PVCs/min_high','SYA_Pauze','SYA_R-op-T_PVCs',"SYA_Run_PVCs_high","SYA_Run_PVCs_high",'SYA_Ventr_ritme',
+            'RA_xBrady_low' ,'RA_xTachy_high','RA_xTachy_high','SYA_AFIB','SYA_Einde onreg_HF',
+            'SYA_HF_high','SYA_HF_high' ,'SYA_HF_low','SYA_HF_low' ,'SYA_HF_onregelmatig',
+            'SYA_Pauze','SYA_Ventr_ritme',
             'SEI_ABP_manch_ovrdruk','SI_ABP_Wijzig_schl','SI_ABP_artefact','SI_ABP_contr_nulling','SI_ECG_contr_kabel',
             'SI_ECG/arr_alrmn_uit','SI_Som_ECG_alrmn_uit','SI_SpO2_ctrl_sensor','SI_SpO2_lage_PFI','SI_SpO2_trageUpdate',
             'SI_SpO2_zoekend','SI_SpO2_zwak_signaal','YA_ABPm_high','YA_ABPm_low','YA_ABPs_high',

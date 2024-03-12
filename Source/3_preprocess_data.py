@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 LOCATION_DATA   = 'data/'
-FREQ = '1Min'
+FREQ = '30S'
 
 cols_to_check = ['SI_SpO2_zoekend', 'HI_ABP_Geen_transdcr',
        'HI_ABP_buiten_bereik', 'SI_SpO2_ctrl_sensor', 
@@ -19,17 +19,17 @@ cols_to_check = ['SI_SpO2_zoekend', 'HI_ABP_Geen_transdcr',
        'HI_V_Afl_los', 'SEI_ABP_manch_ovrdruk', 'SI_ABP_contr_nulling', 'SI_ECG_contr_kabel',
        'SI_SpO2_trageUpdate']
 
-sig_cols = ['ABPd', 'ABPm', 'ABPs', 'HF', 'PVC', 'RF', 'SpO2', 'etCO2', 'etCO2_bin']
+sig_cols = ['ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2', 'etCO2', 'etCO2_bin']
 
 al_cols = ['RA_ VTach', 'RA_ABP_losgeraakt', 'RA_ABPm_high',
        'RA_ABPm_low', 'RA_ABPs_high', 'RA_ABPs_low', 'RA_Apneu', 'RA_Brady',
        'RA_Brady/P_low', 'RA_Desaturatie', 'RA_Extreme_brady',
        'RA_Extreme_tachy', 'RA_Tachy', 'RA_Tachy/P_high', 'RA_Vent_fibr/tach',
        'RA_asystolie', 'RA_xBrady_low', 'RA_xTachy_high',
-       'SYA_AFIB', 'SYA_Doublet_PVCs',
+       'SYA_AFIB', 
        'SYA_Einde onreg_HF', 'SYA_HF_high', 'SYA_HF_low',
-       'SYA_HF_onregelmatig', 'SYA_Multivorm_PVCs', 'SYA_PVCs/min_high',
-       'SYA_Pauze', 'SYA_R-op-T_PVCs', 'SYA_Run_PVCs_high', 'SYA_Ventr_ritme',
+       'SYA_HF_onregelmatig',
+       'SYA_Pauze', 'SYA_Ventr_ritme',
        'YA_ABPm_high', 'YA_ABPm_low', 'YA_ABPs_high', 'YA_ABPs_low',
        'YA_ABPs_low ', 'YA_ECG_afl_los', 'YA_HF_high',
        'YA_HF_low', 'YA_Pols_high', 'YA_RF_high', 'YA_RF_low',
@@ -49,11 +49,6 @@ data.loc[:, 'MRN']    = data.loc[:, 'MRN'].astype(str)
 data                  = data.sort_values(['MRN', 'Time'])
 data                  = data.groupby(['MRN', pd.Grouper(key = 'Time', freq=FREQ)]).agg([np.nanmean])
 
-# THRESH = 0.003
-# h = alarms.sum().sort_values(ascending=True)/alarms.sum().sum()
-# alarms_to_keep = h[h>= THRESH].index
-# alarms = alarms.loc[:, alarms_to_keep]
-
 data.columns         = data.columns.droplevel(1)
 data                 = data.drop(columns='Unnamed: 0')
 
@@ -61,16 +56,12 @@ alarms.columns       = alarms.columns.droplevel(1)
 
 data                 = data.merge(alarms, on=['MRN', 'Time'], how='left')
 
-data_no_tech_alarms = data #[data.loc[:, cols_to_check].sum(axis=1) == 0]
-# data_no_tech_alarms = data_no_tech_alarms.drop(columns=cols_to_check)
+data_no_tech_alarms = data[data.loc[:, cols_to_check].sum(axis=1) == 0]
+data_no_tech_alarms = data_no_tech_alarms.drop(columns=cols_to_check)
 
 data_no_tech_alarms.loc[:, al_cols] = data_no_tech_alarms.loc[:, al_cols].fillna(0)
 data_no_tech_alarms.loc[:, sig_cols] = data_no_tech_alarms.loc[:, sig_cols].fillna(data_no_tech_alarms.loc[:, sig_cols].mean())
 
 data_no_tech_alarms = data_no_tech_alarms.drop(columns='etCO2')
 
-# to_drop = ['RA_Brady/P_low', 'RA_Tachy', 'RA_Tachy/P_high', 'SYA_Multivorm_PVCs', 'YA_SpO2_gn_puls']
-
-# data_no_tech_alarms = data_no_tech_alarms.drop(columns=to_drop)
-
-data_no_tech_alarms.to_csv('data/full_data_and_alarms_with_tech.csv')
+data_no_tech_alarms.to_csv('data/full_data_and_alarms_no_tech.csv')
