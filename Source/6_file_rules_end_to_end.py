@@ -138,7 +138,7 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
         disc_data_cat.index          = data.index
 
         disc_data_alarms = data.loc[:, COLS_ALARMS].join(disc_data_cat)
-        # disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
+        disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
         
     else:
         
@@ -179,11 +179,28 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
     
     return rules.Support.mean(), rules.Confidence.mean()    
 
+def mark_surrounding_alarms(sub_df):
+    # Initialize a column to mark rows to keep, default to False
+    sub_df['Keep'] = False
+    
+    # Identify rows where an alarm happened
+    alarm_indices = sub_df[(sub_df['Alarm1'] > 0) | (sub_df['Alarm2'] > 0)].index
+    
+    # For each alarm, mark the surrounding 5 minutes
+    for idx in alarm_indices:
+        alarm_time = sub_df.loc[idx, 'Time']
+        before_time = alarm_time - pd.Timedelta(minutes=5)
+        after_time = alarm_time + pd.Timedelta(minutes=5)
+        
+        # Mark rows within 5 minutes before and after the alarm
+        sub_df.loc[(sub_df['Time'] >= before_time) & (sub_df['Time'] <= after_time), 'Keep'] = True
+    
+    return sub_df
 
 if __name__ == "__main__":
     
     # Parameters - FIXED
-    LOCATION_RESULTS = 'tmpk1000march/'
+    LOCATION_RESULTS = '../results/resk1000/'
 
     VARS            = ['HF', 'PVC', 'RF', 'SpO2', 'ABP']
 
@@ -207,15 +224,15 @@ if __name__ == "__main__":
     #    'YA_SpO2_gn_puls', 'YA_SpO2_high', 'YA_SpO2_low', 'YA_etCO2_high',
     #    'YA_etCO2_low']
     
-    COLS_ALARMS_tmp = ['MRN', 'Time', 'ABPd', 'ABPm', 'ABPs', 'HF', 'PVC', 'RF', 'SpO2',
+    COLS_ALARMS_tmp = ['MRN', 'Time', 'ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2',
                        'etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
                    'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
                    'Brady', 'Tachy', 'Vent_fibr/tach', 'asystolie',
-                   'Brady', 'Tachy', 'AFIB', 'Doublet_PVCs', 'Einde onreg_HF', 
-                   'HF_high', 'HF_low', 'HF_onregelmatig', 'PVCs/min_high', 'Pauze', 
-                   'R-op-T_PVCs', 'Run_PVCs_high', 'Ventr_ritme', 'ABPm_high', 'ABPm_low', 
+                   'Brady', 'Tachy', 'AFIB', 'Einde onreg_HF', 
+                   'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
+                   'Ventr_ritme', 'ABPm_high', 'ABPm_low', 
                    'ABPs_high', 'ABPs_low', 'ABPs_low', 'ECG_afl_los', 'HF_high', 'HF_low', 
-                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 'SpO2_low', 'etCO2_high', 'etCO2_low']      
+                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 'SpO2_low']      
     
     # COLS_ALARMS = ['etCO2_bin', 'RA_ VTach', 'RA_ABP_losgeraakt', 'RA_ABPm_high', 'RA_ABPm_low',
     #                'RA_ABPs_high', 'RA_ABPs_low', 'RA_Apneu', 'RA_Brady', 'RA_Desaturatie',
@@ -228,23 +245,24 @@ if __name__ == "__main__":
     
     COLS_ALARMS = ['etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
                    'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
-                    'Tachy', 'Vent_fibr/tach', 'asystolie',
-                    'AFIB', 'Doublet_PVCs', 'Einde onreg_HF', 
-                   'HF_high', 'HF_low', 'HF_onregelmatig', 'PVCs/min_high', 'Pauze', 
-                   'R-op-T_PVCs', 'Run_PVCs_high', 'Ventr_ritme', 
+                   'Tachy', 'Vent_fibr/tach', 'asystolie',
+                   'AFIB', 'Einde onreg_HF', 
+                   'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
+                   'Ventr_ritme', 
                    'ECG_afl_los',  
-                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 'SpO2_low', 'etCO2_high', 'etCO2_low'] 
+                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 
+                   'SpO2_low'] 
     
 
     # Parameters - TO OPTIMIZE
-    W               = ['1Min', '3Min', '5Min'] # segmentation window
-    S               = [10, 20, 30, 60] # MINUTES, sequence length
+    W               = ['30S', '1Min', '3Min', '5Min'] # segmentation window
+    S               = [20, 40, 60] # MINUTES, sequence length
     NO_BINS         = [3, 5, 10, 15] # alphabet 
-    USE_SIGNAL      = False
+    USE_SIGNAL      = True
     K               = 1000
 
     # Load data 
-    data            = pd.read_csv('data/full_data_and_alarms_with_tech.csv', low_memory=False)
+    data            = pd.read_csv('../data/full_data_and_alarms_no_tech.csv', low_memory=False)
     data.MRN        = data.MRN.astype(str)
     data.Time       = pd.to_datetime(data.Time)
     data            = data.sort_values(['MRN', 'Time'])
@@ -258,6 +276,10 @@ if __name__ == "__main__":
     data = newd
     
     # data = data[data.loc[:, COLS_ALARMS].sum(axis=1) > 0]
+    
+    data = pd.concat([mark_surrounding_alarms(group) for _, group in data.groupby('MRN')])
+    data = data[data['Keep']]
+    data = data.drop(columns=['Keep'])
     
     print(data.shape)
     print(len(data.MRN.unique()))
@@ -279,5 +301,5 @@ if __name__ == "__main__":
         avg_conf.columns = S
         avg_conf.index   = W
         
-        avg_sup.to_csv(LOCATION_RESULTS+str(b)+'_avg_sup_w1-3_s10-60.csv')
-        avg_conf.to_csv(LOCATION_RESULTS+str(b)+'_avg_conf_w1-3_s10-60.csv')
+        avg_sup.to_csv(LOCATION_RESULTS+str(b)+'_avg_sup_w30-5_s20-60.csv')
+        avg_conf.to_csv(LOCATION_RESULTS+str(b)+'_avg_conf_w3--5_s20-60.csv')
