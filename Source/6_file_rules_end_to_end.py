@@ -184,7 +184,7 @@ def mark_surrounding_alarms(sub_df):
     sub_df['Keep'] = False
     
     # Identify rows where an alarm happened
-    alarm_indices = sub_df[(sub_df['Alarm1'] > 0) | (sub_df['Alarm2'] > 0)].index
+    alarm_indices = sub_df[(sub_df.loc[:, COLS_ALARMS].sum(axis=1) > 0)].index
     
     # For each alarm, mark the surrounding 5 minutes
     for idx in alarm_indices:
@@ -224,15 +224,27 @@ if __name__ == "__main__":
     #    'YA_SpO2_gn_puls', 'YA_SpO2_high', 'YA_SpO2_low', 'YA_etCO2_high',
     #    'YA_etCO2_low']
     
-    COLS_ALARMS_tmp = ['MRN', 'Time', 'ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2',
-                       'etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
-                   'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
-                   'Brady', 'Tachy', 'Vent_fibr/tach', 'asystolie',
-                   'Brady', 'Tachy', 'AFIB', 'Einde onreg_HF', 
-                   'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
-                   'Ventr_ritme', 'ABPm_high', 'ABPm_low', 
-                   'ABPs_high', 'ABPs_low', 'ABPs_low', 'ECG_afl_los', 'HF_high', 'HF_low', 
-                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 'SpO2_low']      
+    # COLS_ALARMS_tmp = ['MRN', 'Time', 'ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2',
+    #                    'etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
+    #                'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
+    #                'Brady', 'Tachy', 'Vent_fibr/tach', 'asystolie',
+    #                'Brady', 'Tachy', 'AFIB', 'Einde onreg_HF', 
+    #                'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
+    #                'Ventr_ritme', 'ABPm_high', 'ABPm_low', 
+    #                'ABPs_high', 'ABPs_low', 'ABPs_low', 'ECG_afl_los', 'HF_high', 'HF_low', 
+    #                'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 'SpO2_low'] 
+    
+    COLS_ALARMS_tmp = ['MRN', 'Time', 'ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2', 'etCO2_bin',
+       'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
+       'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Brady/P_low',
+       'Desaturatie', 'Extreme_brady', 'Extreme_tachy', 'Tachy',
+       'Tachy/P_high', 'Vent_fibr/tach', 'asystolie', 'xBrady_low',
+       'xTachy_high', 'AFIB', 'Einde onreg_HF', 'HF_high',
+       'HF_low', 'HF_onregelmatig', 'Pauze', 'Ventr_ritme',
+       'ABPm_high', 'ABPm_low', 'ABPs_high', 'ABPs_low',
+       'ABPs_low ', 'ECG_afl_los', 'HF_high', 'HF_low',
+       'Pols_high', 'RF_high', 'RF_low', 'SpO2_gn_puls',
+       'SpO2_high', 'SpO2_low']     
     
     # COLS_ALARMS = ['etCO2_bin', 'RA_ VTach', 'RA_ABP_losgeraakt', 'RA_ABPm_high', 'RA_ABPm_low',
     #                'RA_ABPs_high', 'RA_ABPs_low', 'RA_Apneu', 'RA_Brady', 'RA_Desaturatie',
@@ -243,15 +255,24 @@ if __name__ == "__main__":
     #                'YA_ABPs_high', 'YA_ABPs_low', 'YA_ECG_afl_los', 'YA_HF_high', 'YA_HF_low', 
     #                'YA_Pols_high', 'YA_RF_high', 'YA_RF_low', 'YA_SpO2_high', 'YA_SpO2_low', 'YA_etCO2_high', 'YA_etCO2_low']   
     
-    COLS_ALARMS = ['etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
-                   'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
-                   'Tachy', 'Vent_fibr/tach', 'asystolie',
-                   'AFIB', 'Einde onreg_HF', 
-                   'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
-                   'Ventr_ritme', 
-                   'ECG_afl_los',  
-                   'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 
-                   'SpO2_low'] 
+    # COLS_ALARMS = ['etCO2_bin', 'VTach', 'ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
+    #                'ABPs_high', 'ABPs_low', 'Apneu', 'Brady', 'Desaturatie',
+    #                'Tachy', 'Vent_fibr/tach', 'asystolie',
+    #                'AFIB', 'Einde onreg_HF', 
+    #                'HF_high', 'HF_low', 'HF_onregelmatig', 'Pauze', 
+    #                'Ventr_ritme', 
+    #                'ECG_afl_los',  
+    #                'Pols_high', 'RF_high', 'RF_low', 'SpO2_high', 
+    #                'SpO2_low'] 
+    
+    COLS_ALARMS = ['ABP_losgeraakt', 'ABPm_high', 'ABPm_low',
+       'ABPs_high', 'ABPs_low', 'ABPs_low ', 'AFIB', 'Apneu', 'Brady',
+       'Brady/P_low', 'Desaturatie', 'ECG_afl_los', 'Einde onreg_HF',
+       'Extreme_brady', 'Extreme_tachy', 'HF_high', 'HF_low',
+       'HF_onregelmatig', 'Pauze', 'Pols_high', 'RF_high', 'RF_low',
+        'SpO2_gn_puls', 'SpO2_high', 'SpO2_low', 'Tachy',
+       'Tachy/P_high', 'VTach', 'Vent_fibr/tach', 'Ventr_ritme', 'asystolie',
+       'etCO2_bin', 'xBrady_low', 'xTachy_high']
     
 
     # Parameters - TO OPTIMIZE
@@ -284,6 +305,10 @@ if __name__ == "__main__":
     print(data.shape)
     print(len(data.MRN.unique()))
     
+    data.to_csv(LOCATION_RESULTS+'ready_data.csv')
+    
+    print('Start sensitivity analysis')
+    
     for b in NO_BINS:
 
         avg_sup = np.zeros((len(W), len(S)))
@@ -302,4 +327,6 @@ if __name__ == "__main__":
         avg_conf.index   = W
         
         avg_sup.to_csv(LOCATION_RESULTS+str(b)+'_avg_sup_w30-5_s20-60.csv')
-        avg_conf.to_csv(LOCATION_RESULTS+str(b)+'_avg_conf_w3--5_s20-60.csv')
+        avg_conf.to_csv(LOCATION_RESULTS+str(b)+'_avg_conf_w30-5_s20-60.csv')
+        
+    print('End :)')
