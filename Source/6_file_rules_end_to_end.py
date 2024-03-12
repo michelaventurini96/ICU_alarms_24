@@ -137,9 +137,9 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
         disc_data_cat                = disc_data_cat.drop(cols_to_drop, axis=1)
         disc_data_cat.index          = data.index
 
-        COLS_ALARMS1 = COLS_ALARMS.append('etCO2_bin')
+        COLS_ALARMS.append('etCO2_bin')
 
-        disc_data_alarms = data.loc[:, COLS_ALARMS1].join(disc_data_cat)
+        disc_data_alarms = data.loc[:, COLS_ALARMS].join(disc_data_cat)
         # disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
         
     else:
