@@ -112,7 +112,7 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
     
     data[data.loc[:, COLS_ALARMS]>0] = 1
     
-    data.to_csv(LOCATION_RESULTS+'data_to_descr.csv')
+    # data.to_csv(LOCATION_RESULTS+'data_to_descr.csv')
     vars_to_disc = ['ABPd', 'ABPm', 'ABPs', 'HF', 'RF', 'SpO2']
 
     if USE_SIGNAL:
@@ -137,8 +137,10 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
         disc_data_cat                = disc_data_cat.drop(cols_to_drop, axis=1)
         disc_data_cat.index          = data.index
 
-        disc_data_alarms = data.loc[:, COLS_ALARMS].join(disc_data_cat)
-        disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
+        COLS_ALARMS1 = COLS_ALARMS.append('etCO2_bin')
+
+        disc_data_alarms = data.loc[:, COLS_ALARMS1].join(disc_data_cat)
+        # disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
         
     else:
         
@@ -282,30 +284,35 @@ if __name__ == "__main__":
     USE_SIGNAL      = True
     K               = 1000
 
-    # Load data 
-    data            = pd.read_csv('../data/full_data_and_alarms_no_tech.csv', low_memory=False)
-    data.MRN        = data.MRN.astype(str)
-    data.Time       = pd.to_datetime(data.Time)
-    data            = data.sort_values(['MRN', 'Time'])
+    # # Load data ---ALREADY DONE
+    # data            = pd.read_csv('../data/full_data_and_alarms_no_tech.csv', low_memory=False)
+    # data.MRN        = data.MRN.astype(str)
+    # data.Time       = pd.to_datetime(data.Time)
+    # data            = data.sort_values(['MRN', 'Time'])
     
-    data.columns = COLS_ALARMS_tmp
+    # data.columns = COLS_ALARMS_tmp
     
-    newd = data.iloc[:, 2:].astype(float).groupby(data.iloc[:, 2:].columns, axis=1).sum()
-    newd.loc[:, 'MRN'] = data.MRN
-    newd.loc[:, 'Time'] = data.Time
+    # newd = data.iloc[:, 2:].astype(float).groupby(data.iloc[:, 2:].columns, axis=1).sum()
+    # newd.loc[:, 'MRN'] = data.MRN
+    # newd.loc[:, 'Time'] = data.Time
     
-    data = newd
+    # data = newd
     
-    # data = data[data.loc[:, COLS_ALARMS].sum(axis=1) > 0]
+    # # data = data[data.loc[:, COLS_ALARMS].sum(axis=1) > 0]
     
-    data = pd.concat([mark_surrounding_alarms(group) for _, group in data.groupby('MRN')])
-    data = data[data['Keep']]
-    data = data.drop(columns=['Keep'])
+    # data = pd.concat([mark_surrounding_alarms(group) for _, group in data.groupby('MRN')])
+    # data = data[data['Keep']]
+    # data = data.drop(columns=['Keep'])
     
-    print(data.shape)
-    print(len(data.MRN.unique()))
+    # print(data.shape)
+    # print(len(data.MRN.unique()))
     
-    data.to_csv(LOCATION_RESULTS+'ready_data.csv')
+    # data.to_csv(LOCATION_RESULTS+'ready_data.csv') ---END ALREADY DONE
+    
+    data = pd.read_csv(LOCATION_RESULTS+'ready_data.csv', low_memory=False)
+    data.loc[:, 'Time'] = pd.to_datetime(data.loc[:, 'Time'])
+    
+    data = data.sort_values(['MRN', 'Time'])
     
     print('Start sensitivity analysis')
     
