@@ -7,7 +7,7 @@ sys.path.append('..')
 
 # Parameters
 
-LOCATION_DATA   = 'data/'
+LOCATION_DATA   = '../data/'
 # VARS_SIG        = ['HF', 'RF', 'SpO2', 'ABPd', 'ABPm', 'ABPs', 'etCO2']
 HOURS_MIN       = 6
 VARS_MIN        = 4
@@ -98,7 +98,7 @@ substrings = ['ABP geen puls', 'ECG afl. los',
  'ABP Geen transdcr', 'ABP buiten bereik', 'ABP artefact',
  ' SpO low', ' VTach', ' HF high',
  'ABP-meting misl.',  'SpO intrfrentie', ' Desaturatie', ' AFIB',
- ' Einde AFIB', 'Som ECG alrmn uit',
+ 'Som ECG alrmn uit',
  'SpO zwak signaal', ' RF high', ' Pauze', ' SpO gn puls',
  'ABP onderbroken', ' Extreme tachy', ' Extreme brady',
  ' asystolie', 'ABP defect', 'SpO grillig' ,

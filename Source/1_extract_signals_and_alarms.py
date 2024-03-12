@@ -95,7 +95,7 @@ def extract_alarms_parallel(i):
         df.loc[:, 'measurementime'] =  pd.to_datetime(df.loc[:, 'measurementime'])
         df.loc[:, 'count'] = np.ones((df.shape[0], ))
         df = df.groupby(['MRN','ParameterText', 'ParameterValue', pd.Grouper(key = 'measurementime', freq=S)]).agg(np.nansum).reset_index()
-        df.columns = df.columns.droplevel(1)
+        # df.columns = df.columns.droplevel(1)
         batches.append(df)
         del df
 
@@ -103,21 +103,21 @@ def extract_alarms_parallel(i):
     df.to_csv(LOCATION_DATA+'batch_ALARMS'+str(i)+'.csv')
     del df
 
-# 1. Extract SIGNALS and ALARMS of interest
+# # 1. Extract SIGNALS and ALARMS of interest
 
-print('Extract signal...')
-[extract_signals(i) for i in tqdm(range(4))]
+# print('Extract signal...')
+# [extract_signals(i) for i in tqdm(range(4))]
 
-batches_signal  = []
-for i in tqdm(range(4)):
-    df = pd.read_csv(LOCATION_DATA+'batch_SIGNALS'+str(i)+'.csv', low_memory=False, index_col=0, on_bad_lines='skip')
-    batches_signal.append(df)
-    del df
+# batches_signal  = []
+# for i in tqdm(range(4)):
+#     df = pd.read_csv(LOCATION_DATA+'batch_SIGNALS'+str(i)+'.csv', low_memory=False, index_col=0, on_bad_lines='skip')
+#     batches_signal.append(df)
+#     del df
 
-data_signals = pd.concat(batches_signal, axis=0)
-data_signals.to_csv(LOCATION_DATA+'1_all_signals.csv')
+# data_signals = pd.concat(batches_signal, axis=0)
+# data_signals.to_csv(LOCATION_DATA+'1_all_signals.csv')
 
-del data_signals
+# del data_signals
 
 print('Extract alarms...')
 Parallel(n_jobs=4)(delayed(extract_alarms_parallel)(i) for i in range(4))

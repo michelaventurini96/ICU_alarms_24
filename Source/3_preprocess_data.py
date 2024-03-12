@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-LOCATION_DATA   = 'data/'
+LOCATION_DATA   = '../data/'
 FREQ = '30S'
 
 cols_to_check = ['SI_SpO2_zoekend', 'HI_ABP_Geen_transdcr',
@@ -62,6 +62,6 @@ data_no_tech_alarms = data_no_tech_alarms.drop(columns=cols_to_check)
 data_no_tech_alarms.loc[:, al_cols] = data_no_tech_alarms.loc[:, al_cols].fillna(0)
 data_no_tech_alarms.loc[:, sig_cols] = data_no_tech_alarms.loc[:, sig_cols].fillna(data_no_tech_alarms.loc[:, sig_cols].mean())
 
-data_no_tech_alarms = data_no_tech_alarms.drop(columns='etCO2')
+data_no_tech_alarms = data_no_tech_alarms.drop(columns=['etCO2','YA_etCO2_high','YA_etCO2_low'])
 
-data_no_tech_alarms.to_csv('data/full_data_and_alarms_no_tech.csv')
+data_no_tech_alarms.to_csv('../data/full_data_and_alarms_no_tech.csv')
