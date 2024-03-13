@@ -137,8 +137,6 @@ def end_to_end_rules(data, w, s, NO_BINS, USE_SIGNAL, k):
         disc_data_cat                = disc_data_cat.drop(cols_to_drop, axis=1)
         disc_data_cat.index          = data.index
 
-        COLS_ALARMS.append('etCO2_bin')
-
         disc_data_alarms = data.loc[:, COLS_ALARMS].join(disc_data_cat)
         # disc_data_alarms = disc_data_alarms.join(data.loc[:, 'etCO2_bin'])
         
@@ -276,7 +274,6 @@ if __name__ == "__main__":
        'Tachy/P_high', 'VTach', 'Vent_fibr/tach', 'Ventr_ritme', 'asystolie',
        'etCO2_bin', 'xBrady_low', 'xTachy_high']
     
-
     # Parameters - TO OPTIMIZE
     W               = ['30S', '1Min', '3Min', '5Min'] # segmentation window
     S               = [20, 40, 60] # MINUTES, sequence length
